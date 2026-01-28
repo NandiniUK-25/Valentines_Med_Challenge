@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Catch My Heart!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ffb3c6, #ff6b81 40%, #3b1f2b 100%);
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 1.5rem 1rem 0.5rem;
+      z-index: 5;
+      position: relative;
+    }
+
+    .title {
+      font-size: 2.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0.25rem auto 0;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0 1rem 1.5rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .card {
+      background: rgba(59, 31, 43, 0.85);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      text-align: left;
+      font-size: 0.95rem;
+      transition: opacity 0.6s ease; /* for fade-out */
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .flag-hint {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+      word-wrap: break-word;
+    }
+
+    .flag-label {
+      color: #ffb3c6;
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 0.5rem 1rem 0.9rem;
+      font-size: 0.8rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 5;
+    }
+
+    .card.hide-after {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #play-area {
+      position: fixed;
+      inset: 0;
+      pointer-events: none; 
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .floating-img {
+      position: absolute;
+      display: block;
+      pointer-events: auto;
+    }
+
+    .floating-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .floating-img:hover img {
+      transform: scale(1.1);
+      box-shadow: 0 0 22px rgba(0, 0, 0, 1);
+    }
+
+    @media (max-width: 600px) {
+      .title {
+        font-size: 1.9rem;
+      }
+      .card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="title">Catch my Heart!</h1>
+    <p class="subtitle">
+      Catch the floating hearts! Right click a moving image to download it. Somewhere inside your downloads, the real secret is waiting.
+    </p>
+  </header>
+
+  <main>
+    <section class="card" id="how-to-play">
+      <h2>How to play</h2>
+      <p>- Twenty images will float around the screen.</p>
+      <p>- Your job is to “catch” them by right clicking each one.</p>
+      <div class="flag-hint">
+        <span class="flag-label">Hint:</span>
+        Not all hearts are the same. Maybe one file name, size, or metadata hides more than the others.
+      </div>
+    </section>
+  </main>
+
+  <div id="play-area"></div>
+
+
+  <script>
+    const imageFiles = [
+      "secret_hints.jpg", "didn't think youd click this but you actually found me!.webp", "click me i'm the correct one.jpg", "you found me..check my properties to find the flag.jpg", "lost_packets.jpg", "didn't think youd clck me but hehe.jpg", "damn thought it wasnt obvious, you found me.jpg",
+      "hehe you found me now check me.jpg", "arent i a cute image! click me to find the flag.jpg", "woah you actually clicked me, look into me now.webp", "ha gotchu, but ig you win, heres the flag.jpg", "well gg you win, heres the flag.jpg", "isnt this picture the cutest, now search me to find the flag.jpg",
+      "didn't think youd click me, heres the win, look thru me for my flag.jpg", "dont tell me you thought it was me, gotchu.jpeg", "foxes.. maybe its a hint since its faxhacks.jpg", "foxes again..since you failed the last hint, heres the flag.avif", "you found me! search thru me to find the flag.jpg", "wow you actually clicked me, ggs.jpg", "heres the flag.jpg",
+      "you just love penguins dont you, me too.jpg", "didn't think youd click on this but you found me! Check my properties for my flag..jpg", "httpstinyurl.comflagYou-foundme.jpg", "no way you found me..how..heres my flag.jpeg", "wow you actually clicked me, well ig you win again.jpg", "you found me! heres my flag.jpg", "flag, what flag.webp", 
+      "flags are fun to find, maybe its here.jpg", "dont tell me you clicked me again.webp", "aren't i a cute bear, heres my flag.webp", "zowah! this is the last image in my files.avif"
+    ];
+
+    const playArea = document.getElementById("play-area");
+
+    function createFloatingImage(src, index) {
+      const link = document.createElement("a");
+      link.href = src;
+      link.download = src; 
+      link.className = "floating-img";
+
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Valentine image " + (index + 1);
+
+      link.appendChild(img);
+      playArea.appendChild(link);
+
+      const size = 90 + Math.random() * 70; 
+      link.style.width = size + "px";
+      link.style.height = size + "px";
+
+      let x = Math.random() * (window.innerWidth - size);
+      let y = Math.random() * (window.innerHeight - size);
+
+      // random movement speed and direction
+      let dx = (Math.random() * 2 - 1) * 1.50; // horizontal speed
+      let dy = (Math.random() * 2 - 1) * 1.50; // vertical speed
+
+      function move() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        x += dx * 4;
+        y += dy * 4;
+
+        if (x <= 0 || x + size >= w) {
+          dx = -dx;
+        }
+        if (y <= 0 || y + size >= h) {
+          dy = -dy;
+        }
+
+        link.style.transform = `translate(${x}px, ${y}px)`;
+
+        requestAnimationFrame(move);
+      }
+
+      move();
+    }
+
+    window.addEventListener("load", () => {
+      imageFiles.forEach((file, i) => createFloatingImage(file, i));
+
+      const howToPlay = document.getElementById("how-to-play");
+      setTimeout(() => {
+        if (howToPlay) {
+          howToPlay.classList.add("hide-after");
+        }
+      }, 6000); 
+    });
+  </script>
+</body>
+</html>
